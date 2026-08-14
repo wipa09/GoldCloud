@@ -38,5 +38,12 @@ jobs:
             echo "Keine Aenderungen - ueberspringe Commit."
           else
             git commit -m "Gold-Preis Update $(date -u +'%Y-%m-%d %H:%M UTC')"
-            git push
+            for i in 1 2 3; do
+              if git push; then
+                break
+              fi
+              echo "Push abgelehnt (vermutlich zwischenzeitliche Aenderung) - hole aktuellen Stand und versuche erneut ($i/3)..."
+              git pull --rebase origin main
+              sleep 2
+            done
           fi
