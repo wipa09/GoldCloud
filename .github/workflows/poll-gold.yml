@@ -30,10 +30,20 @@ jobs:
         run: python scripts/poll_gold.py
 
       - name: Aenderungen committen und pushen
-        uses: stefanzweifel/git-auto-commit-action@v7
-        with:
-          commit_message: "Gold-Preis Update"
-          commit_user_name: gold-poll-bot
-          commit_user_email: actions@users.noreply.github.com
-          file_pattern: gold-data.json
-          skip_dirty_check: false
+        run: |
+          git config user.name "gold-poll-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add gold-data.json
+          if git diff --cached --quiet; then
+            echo "Keine Aenderungen - ueberspringe Commit."
+          else
+            git commit -m "Gold-Preis Update $(date -u +'%Y-%m-%d %H:%M UTC')"
+            for i in 1 2 3; do
+              if git push; then
+                break
+              fi
+              echo "Push abgelehnt (vermutlich zwischenzeitliche Aenderung) - hole aktuellen Stand und versuche erneut ($i/3)..."
+              git pull --rebase origin main
+              sleep 2
+            done
+          fi
