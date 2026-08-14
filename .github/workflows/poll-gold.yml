@@ -2,9 +2,14 @@ name: Gold Poll (every 15 min, laeuft in der Cloud - unabhaengig vom eigenen PC)
 
 on:
   schedule:
-    # GitHub-Cron ist "best effort" - kann bei hoher Auslastung ein paar
-    # Minuten Verspaetung haben, das ist normal und fuer M15-Zonen egal.
-    - cron: '*/15 * * * *'
+    # GitHub-Cron ist "best effort" - offizielle GitHub-Doku warnt explizit:
+    # "High load times include the start of every hour" - volle Viertelstunden
+    # (:00/:15/:30/:45) sind der meistgenutzte Zeitpunkt ueberhaupt, weil dort
+    # weltweit die meisten anderen Cron-Jobs ebenfalls feuern wollen. Deshalb
+    # bewusst auf eine "krumme" Minute verschoben (hier: 7 nach jedem Viertel) -
+    # bleibt weiterhin alle 15 Minuten, kollidiert aber seltener mit der Last-
+    # spitze. Das ist GitHubs eigene offizielle Empfehlung dagegen.
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch: {}  # erlaubt manuelles "Run workflow" zum Testen
 
 permissions:
